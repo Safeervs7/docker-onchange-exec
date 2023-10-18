@@ -4,14 +4,6 @@ networks:
   my-network:
     name: my-network
 
-volumes:
-  work-dir:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: $PWD
-
 services:
   main-app:
     restart: always
@@ -19,22 +11,18 @@ services:
     build:
       context: .
       dockerfile: ./Dockerfile
-    privileged: true
-    volumes:
-      - 'work-dir:/work-dir'
 
   git-on-change:
     depends_on:
       - main-app
     restart: unless-stopped
-    image: redsh4d0w/docker-onchange-exec:1.0
+    image: redsh4d0w/docker-onchange-exec:1.1
     privileged: true
     environment:
-      - FILES_TO_CHECK=package.json
-      - COMMAND_TO_CHECK=/usr/bin/git pull
+      - FILES_TO_CHECK=/work-dir/package.json
+      - COMMAND_TO_CHECK=sh -c "/usr/bin/git config --global --add safe.directory /work-dir && /usr/bin/git pull"
       - COMMAND_TO_RUN=/usr/local/bin/npm install
       - CONTAINER_NAME=main-app
       - SLEEP_INTERVAL=10
     volumes:
       - '/var/run/docker.sock:/var/run/docker.sock'
-      - 'work-dir:/on-change'
