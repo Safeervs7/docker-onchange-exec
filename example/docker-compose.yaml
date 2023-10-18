@@ -16,14 +16,11 @@ services:
     depends_on:
       - main-app
     restart: unless-stopped
-    # image: redsh4d0w/docker-onchange-exec:1.0
-    build:
-      context: ../
-      dockerfile: ./Dockerfile
+    image: redsh4d0w/docker-onchange-exec:1.1
     privileged: true
     environment:
       - FILES_TO_CHECK=/work-dir/package.json
-      - COMMAND_TO_CHECK=/usr/bin/git pull
+      - COMMAND_TO_CHECK=sh -c "/usr/bin/git config --global --add safe.directory /work-dir && /usr/bin/git pull"
       - COMMAND_TO_RUN=/usr/local/bin/npm install
       - CONTAINER_NAME=main-app
       - SLEEP_INTERVAL=10
