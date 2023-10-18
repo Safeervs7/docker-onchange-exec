@@ -7,12 +7,11 @@ import docker
 docker_client = docker.from_env()
 
 # Function to calculate the checksum of a file
-def calculate_checksum(file_path):
-    hasher = hashlib.md5()
-    with open(file_path, 'rb') as f:
-        for chunk in iter(lambda: f.read(4096), b''):
-            hasher.update(chunk)
-    return hasher.hexdigest()
+def calculate_checksum(container_name, file_path):
+    command_to_run = f"md5sum {file_path}"
+    exec_result = run_command(container_name, command_to_run)
+    checksum = exec_result.split()[0]
+    return checksum
 
 # Function to run specified command
 def run_command(container_name, command):
@@ -21,9 +20,9 @@ def run_command(container_name, command):
     return exec_result.output.decode('utf-8')
 
 # Check if any of the specified files has changed
-def check_for_changes(files):
+def check_for_changes(container_name, files):
     for file_path in files:
-        current_checksum = calculate_checksum(file_path)
+        current_checksum = calculate_checksum(container_name, file_path)
         if checksums.get(file_path) != current_checksum:
             print(f'File {file_path} has changed.')
             return True
@@ -50,17 +49,17 @@ if __name__ == "__main__":
 
 
     # Calculate initial checksums
-    checksums = {file_path: calculate_checksum(file_path) for file_path in files_to_check}
+    checksums = {file_path: calculate_checksum(container_name, file_path) for file_path in files_to_check}
 
     try:
         while True:
             check_command_result = run_command(container_name, command_to_check)
             print('COMMAND_TO_CHECK RESULT: ', check_command_result )
-            if check_for_changes(files_to_check):
+            if check_for_changes(container_name, files_to_check):
                 exec_result = run_command(container_name, command_to_run)
                 print('COMMAND_TO_RUN RESULT: ', exec_result )
                 # Update checksums after running the command
-                checksums = {file_path: calculate_checksum(file_path) for file_path in files_to_check}
+                checksums = {file_path: calculate_checksum(container_name, file_path) for file_path in files_to_check}
             time.sleep(sleep_interval)  # Wait for SLEEP_INTERVAL before the next iteration
     except KeyboardInterrupt:
         print("\nStopping the script.")
