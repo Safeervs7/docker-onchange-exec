@@ -39,7 +39,7 @@ SLEEP_INTERVAL=10: Sets the interval (in seconds) at which the script checks for
 -v /var/run/docker.sock:/var/run/docker.sock: Binds the Docker socket of the host to the Docker socket inside the container, enabling communication with the Docker daemon.
 
 ## Example
-Explore the https://github.com/Safeervs7/docker-onchange-exec/tree/main/example example folder to understand how you can structure your project and adapt the Docker Compose configuration.
+Explore the https://github.com/redsh4d0w/docker-onchange-exec/tree/main/example example folder to understand how you can structure your project and adapt the Docker Compose configuration.
 
 ```bash
 version: '2.17'
