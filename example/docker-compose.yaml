@@ -16,7 +16,7 @@ services:
     depends_on:
       - main-app
     restart: unless-stopped
-    image: redsh4d0w/docker-onchange-exec:1.1
+    image: unix-nomad/docker-onchange-exec:doe-67febbd
     privileged: true
     environment:
       - FILES_TO_CHECK=/work-dir/package.json
