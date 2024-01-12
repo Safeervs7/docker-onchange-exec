@@ -1,0 +1,19 @@
+version: '3'
+
+networks:
+  docker-onchange-exec:
+    name: docker-onchange-exec
+
+services:
+  git-on-change:
+    restart: unless-stopped
+    image: unix-nomad/docker-onchange-exec:doe-67febbd
+    privileged: true
+    environment:
+      - FILES_TO_CHECK=/work-dir/package.json
+      - COMMAND_TO_CHECK=sh -c "/usr/bin/git config --global --add safe.directory /work-dir && /usr/bin/git pull"
+      - COMMAND_TO_RUN=/usr/local/bin/npm install
+      - CONTAINER_NAME=main-app
+      - SLEEP_INTERVAL=10
+    volumes:
+      - '/var/run/docker.sock:/var/run/docker.sock'
