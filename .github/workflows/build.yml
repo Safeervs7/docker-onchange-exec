@@ -1,0 +1,62 @@
+name: "Build and Push to Docker Hub"
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - 'example/docker-compose.yaml'
+jobs:
+  build:
+    name: "Build and Push to  Docker Hub"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Build, tag
+        id: build-image
+        env:
+          REGISTRY: unixnomad
+          REPOSITORY: docker-onchange-exec
+        run: |
+          IMAGE_TAG=doe-$(git rev-parse --short HEAD)
+          docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
+          echo "image_tag=$IMAGE_TAG" >> "$GITHUB_OUTPUT"
+          echo "image=$REGISTRY/$REPOSITORY:$IMAGE_TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Scan image    
+        uses: anchore/scan-action@v3
+        with:
+          image: ${{ steps.build-image.outputs.image }}
+          fail-build: true
+          severity-cutoff: critical
+          output-format: table
+        continue-on-error: true
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: push image to Docker hub
+        env:
+          IMAGE_NAME: ${{ steps.build-image.outputs.image }}
+        id: push-image
+        run: |
+          docker push $IMAGE_NAME
+
+      - name: Deployment Update
+        env:
+          IMAGE_NAME: ${{ steps.build-image.outputs.image }}
+          IMAGE_TAG: ${{ steps.build-image.outputs.image_tag }}
+        run: |
+            CURRENT_TAG=$(cat example/docker-compose.yaml | grep -i image| awk -F ':' '{print $NF}')
+            sed -i "s/$CURRENT_TAG/$IMAGE_TAG/" example/docker-compose.yaml
+
+            git config --global user.email "user@github.com"
+            git config --global user.name "Git Actions"
+            git add .
+            git commit -m "[Deployment commit] $IMAGE_TAG"
+            git push
