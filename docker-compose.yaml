@@ -1,11 +1,7 @@
 version: '3'
 
-networks:
-  docker-onchange-exec:
-    name: docker-onchange-exec
-
 services:
-  git-on-change:
+  docker-onchange-exec:
     restart: unless-stopped
     image: unix-nomad/docker-onchange-exec:doe-67febbd
     privileged: true
