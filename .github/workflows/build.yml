@@ -17,7 +17,7 @@ jobs:
       - name: Build, tag
         id: build-image
         env:
-          REGISTRY: unixnomad
+          REGISTRY: r3dshadow
           REPOSITORY: docker-onchange-exec
         run: |
           IMAGE_TAG=doe-$(git rev-parse --short HEAD)
