@@ -16,7 +16,7 @@ services:
     depends_on:
       - main-app
     restart: unless-stopped
-    image: r3dshadow/docker-onchange-exec:doe-48dfb84
+    image: r3dshadow/docker-onchange-exec:doe-f076eb4
     privileged: true
     environment:
       - FILES_TO_CHECK=/work-dir/package.json
